@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<!-- ADMIN NAVBAR -->
+<div class="navbar-container admin-navbar">
+
+  <div></div>
+
+  <div class="nav-logo admin-logo">AURELIA</div>
+
+  <div class="nav-actions">
+    <button onclick="logout()">⏻</button>
+  </div>
+
+</div>
+
+
+  <div class="navbar-container" style="justify-content:center;">
+    <div class="nav-links">
+      <a href="admin.html">Dashboard</a>
+      <a href="admin-customers.html">View Customers</a>
+      <a href="admin-products.html">Manage Products</a>
+      <a href="admin-orders.html">View Orders</a>
+    </div>
+  </div>
+</div>
+<br>
+<hr>
+<!-- DASHBOARD CONTENT -->
+
+<div class="container">
+
+  <h2 class="section-heading">ADMIN DASHBOARD</h2>
+
+  <!-- SUMMARY CARDS -->
+<div class="admin-summary">
+
+  <div class="summary-card">
+    <h4>Total Orders</h4>
+    <p id="totalOrders">0</p>
+  </div>
+
+  <div class="summary-card">
+    <h4>Total Revenue</h4>
+    <p id="totalRevenue">LKR 0</p>
+  </div>
+
+  <div class="summary-card">
+    <h4>Total Customers</h4>
+    <p id="totalCustomers">0</p>
+  </div>
+
+</div>
+  <h3>Orders Per Day</h3>
+  <canvas id="ordersChart" height="100"></canvas>
+
+</div>
+
+
+
+<div class="chart-row">
+
+  <div class="chart-column">
+    <h3>Orders by Payment Method</h3>
+    <div class="chart-box small-chart">
+      <canvas id="paymentChart"></canvas>
+    </div>
+  </div>
+
+  <div class="chart-column">
+    <h3>Order Status Distribution</h3>
+    <div class="chart-box small-chart">
+      <canvas id="statusChart"></canvas>
+    </div>
+  </div>
+
+</div>
+
+
+<script>
+// ADMIN CHECK
+if (!localStorage.getItem("admin")) {
+  window.location.href = "login.html";
+}
+
+// FETCH ORDER STATS
+fetch("/admin/order-stats")
+  .then(res => res.json())
+  .then(data => {
+
+    const labels = data.map(d => d.date);
+    const values = data.map(d => d.count);
+
+    new Chart(document.getElementById("ordersChart"), {
+      type: "line",
+      data: {
+        labels: labels,
+        datasets: [{
+          label: "Orders per day",
+          data: values,
+          borderColor: "#0057ff",
+          fill: false
+        }]
+      }
+    });
+  });
+
+function logout() {
+  localStorage.removeItem("admin");
+  window.location.href = "login.html";
+}
+
+fetch("/admin/payment-stats")
+  .then(res => res.json())
+  .then(data => {
+    new Chart(document.getElementById("paymentChart"), {
+      type: "pie",
+      data: {
+        labels: Object.keys(data),
+        datasets: [{
+          data: Object.values(data),
+          backgroundColor: [
+            "#ff6384",
+            "#36a2eb",
+            "#ffcd56"
+          ]
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false
+      }
+    });
+  });
+
+
+fetch("/admin/order-status-stats")
+  .then(res => res.json())
+  .then(data => {
+    new Chart(document.getElementById("statusChart"), {
+      type: "doughnut",
+      data: {
+        labels: Object.keys(data),
+        datasets: [{
+          data: Object.values(data),
+          backgroundColor: [
+            "#4caf50",
+            "#ff9800",
+            "#2196f3"
+          ]
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false
+      }
+    });
+  });
+
+  
+fetch("/admin/summary")
+  .then(res => res.json())
+  .then(data => {
+    document.getElementById("totalOrders").innerText = data.totalOrders;
+    document.getElementById("totalRevenue").innerText =
+      "LKR " + data.totalRevenue.toLocaleString();
+    document.getElementById("totalCustomers").innerText = data.totalCustomers;
+  });
+
+
+</script>
+
+
+<!-- FOOTER -->
+<footer class="footer">
+
+  <div class="footer-top">
+    <div class="footer-contact">
+      Contact us at +94 123 456 789
+    </div>
+
+    <div class="footer-socials">
+      <a href="https://web.facebook.com/" title="Facebook">
+        <i class="fab fa-facebook-f"></i>
+      </a>
+      <a href="https://www.instagram.com/" title="Instagram">
+        <i class="fab fa-instagram"></i>
+      </a>
+    </div>
+  </div>
+
+  <div class="footer-divider"></div>
+
+  <div class="footer-bottom">
+    © 2026 Aurelia ·
+    <a href="#">Privacy Policy</a> ·
+    <a href="#">Terms of Service</a> ·
+    <a href="#">Shipping Policy</a>
+  </div>
+
+</footer>
+<script src="js/nav.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin - Products</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+<!-- ADMIN NAVBAR -->
+<div class="navbar-container admin-navbar">
+  <div></div>
+  <div class="nav-logo admin-logo">AURELIA</div>
+  <div class="nav-actions">
+    <button onclick="logout()">⏻</button>
+  </div>
+</div>
+
+<div class="navbar-container" style="justify-content:center;">
+  <div class="nav-links">
+    <a href="admin.html">Dashboard</a>
+    <a href="admin-customers.html">View Customers</a>
+    <a href="admin-products.html">Manage Products</a>
+    <a href="admin-orders.html">View Orders</a>
+  </div>
+</div>
+<br>
+<hr>
+
+<h2 class="section-heading">MANAGE PRODUCTS</h2>
+
+<!-- ADD PRODUCT FORM -->
+<!-- ADD / EDIT PRODUCT -->
+<div class="admin-form product-form">
+  <div class="form-row">
+    <input id="pid" placeholder="Product ID (P001)">
+    <input id="pname" placeholder="Product Name">
+    <input id="pcategory" placeholder="Category">
+  </div>
+
+  <div class="form-row">
+    <input id="pprice" type="number" placeholder="Price">
+    <input id="pstock" type="number" placeholder="Quantity">
+    <input id="pimage" placeholder="Image Path">
+  </div>
+
+  <div class="form-row">
+    <textarea id="pdesc" placeholder="Description"></textarea>
+  </div>
+
+  <button onclick="saveProduct()" class="primary-btn">
+    Save Product
+  </button>
+</div>
+
+<br>
+
+<!-- PRODUCTS TABLE -->
+<table class="admin-table product-table">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Name</th>
+      <th>Price</th>
+      <th>Stock</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody id="productsTable"></tbody>
+</table>
+
+<script>
+// 🔐 ADMIN CHECK
+if (!localStorage.getItem("admin")) {
+  window.location.href = "login.html";
+}
+
+loadProducts();
+
+function loadProducts() {
+  fetch("/admin/products")
+    .then(res => res.json())
+    .then(products => {
+      const table = document.getElementById("productsTable");
+      table.innerHTML = "";
+
+      products.forEach(p => {
+        table.innerHTML += `
+          <tr>
+            <td>${p.product_id}</td>
+            <td>${p.name}</td>
+            <td>LKR ${p.price}</td>
+            <td>${p.stock}</td>
+            <td>
+              <i class="fas fa-pen edit-icon"
+                 onclick='editProduct(${JSON.stringify(p)})'></i>
+              <i class="fas fa-trash delete-icon"
+                 onclick="deleteProduct('${p.product_id}')"></i>
+            </td>
+          </tr>
+        `;
+      });
+    });
+}
+
+// ADD / UPDATE PRODUCT
+function saveProduct() {
+  const data = {
+    product_id: pid.value,
+    name: pname.value,
+    category: pcategory.value,
+    price: Number(pprice.value),
+    stock: Number(pstock.value),
+    image: pimage.value,
+    description: pdesc.value
+  };
+
+  fetch("/admin/save-product", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+  }).then(() => {
+    clearForm();
+    loadProducts();
+  });
+}
+
+// EDIT PRODUCT
+function editProduct(p) {
+  pid.value = p.product_id;
+  pname.value = p.name;
+  pcategory.value = p.category;
+  pprice.value = p.price;
+  pstock.value = p.stock;
+  pimage.value = p.image;
+  pdesc.value = p.description;
+}
+
+// DELETE PRODUCT
+function deleteProduct(pid) {
+  if (!confirm("Delete this product?")) return;
+
+  fetch("/admin/delete-product/" + pid, {
+    method: "DELETE"
+  }).then(() => loadProducts());
+}
+
+function clearForm() {
+  pid.value = pname.value = pcategory.value =
+  pprice.value = pstock.value = pimage.value = pdesc.value = "";
+}
+
+function logout() {
+  localStorage.removeItem("admin");
+  window.location.href = "login.html";
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Home</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<div class="navbar">
+  <div class="navbar-container">
+
+    <!-- Left (can be empty or search later) -->
+    <div></div>
+
+    <!-- Center Logo -->
+    <div class="nav-logo">AURELIA</div>
+
+    <!-- Right Actions -->
+    <div class="nav-actions">
+      <a href="#" onclick="goProfile()">👤</a>
+      <a href="cart.html" title="Cart">🛒</a>
+    </div>
+
+
+  </div>
+
+  <!-- SECOND ROW: LINKS -->
+  <div class="navbar-container" style="justify-content:center;">
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="products.html">Shop</a>
+      <a href="aboutus.html">About Us</a>
+      <a href="contactus.html">Contact Us</a>
+      <a href="storelocator.html">Store Locator</a>
+      <a href="#" onclick="goOrders()">My Orders</a>
+      <a href="register.html">Sign Up</a>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE CONTENT -->
+<div class="container">
+  <p style="text-align:center; margin-top:40px;">
+    <a href="products.html" class="hero-link">
+      Your one stop shop for all your jewellery needs →
+    </a>
+  </p>
+</div>
+
+
+<!-- HERO SECTION -->
+<div class="hero">
+  <div class="hero-overlay">
+    <div class="hero-content">
+      <div class="hero-title">Joaillerie</div>
+      <a href="products.html" class="hero-button">
+        SHOP THE LOOKS
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- FEATURED PRODUCTS -->
+<div class="container featured-section">
+
+  <div class="featured-title">Fine Gold Plated Jewellery</div> <br>
+
+  <div id="featuredProducts" class="featured-grid"></div>
+
+</div>
+
+<script>
+fetch("/products")
+  .then(res => res.json())
+  .then(products => {
+    const container = document.getElementById("featuredProducts");
+
+    // Take ONLY first 4 products
+    const firstFour = products.slice(0, 4);
+
+    firstFour.forEach(p => {
+      container.innerHTML += `
+        <div class="featured-card" onclick="openProduct('${p.product_id}')">
+          <img src="${p.image}" alt="${p.name}">
+          <div class="featured-name">${p.name}</div>
+          <div class="featured-price">LKR. ${Number(p.price).toLocaleString()}</div>
+        </div>
+      `;
+    });
+  });
+
+function openProduct(productId) {
+  window.location.href = "product.html?id=" + productId;
+}
+</script>
+
+<!-- EDITORIAL SECTION -->
+<div class="editorial-section">
+  <div class="editorial-grid">
+
+    <!-- PERSONALIZATION -->
+    <div class="editorial-card">
+      <img src="images/index2.jpg" alt="Personalization">
+      <div class="editorial-title">PERSONALIZATION</div>
+      <div class="editorial-text">
+        Add a personal touch to your jewellery with custom engravings,
+        making every piece uniquely yours.
+      </div>
+      <a href="contactus.html" class="editorial-link">
+        Contact Us to Customize Your Product
+      </a>
+    </div>
+
+    <!-- PREMIUM PACKAGING -->
+    <div class="editorial-card">
+      <img src="images/index3.jpg" alt="Premium Packaging">
+      <div class="editorial-title">PREMIUM PACKAGING</div>
+      <div class="editorial-text">
+        Experience our signature premium packaging, designed to make
+        every order feel special and gift-ready.
+      </div>
+      <a href="contactus.html" class="editorial-link">
+        Contact Us to Give your Package a Premium Look
+      </a>
+    </div>
+
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+
+  <div class="footer-top">
+    <div class="footer-contact">
+      Contact us at +94 123 456 789
+    </div>
+
+    <div class="footer-socials">
+      <a href="https://web.facebook.com/" title="Facebook">
+        <i class="fab fa-facebook-f"></i>
+      </a>
+      <a href="https://www.instagram.com/" title="Instagram">
+        <i class="fab fa-instagram"></i>
+      </a>
+    </div>
+  </div>
+
+  <div class="footer-divider"></div>
+
+  <div class="footer-bottom">
+    © 2026 Aurelia ·
+    <a href="#">Privacy Policy</a> ·
+    <a href="#">Terms of Service</a> ·
+    <a href="#">Shipping Policy</a>
+  </div>
+
+</footer>
+
+
+<script>
+function goProfile() {
+  if (!localStorage.getItem("user")) {
+    localStorage.setItem("redirectAfterLogin", "profile");
+    window.location.href = "login.html";
+  } else {
+    window.location.href = "profile.html";
+  }
+}
+
+function goOrders() {
+  if (!localStorage.getItem("user")) {
+    localStorage.setItem("redirectAfterLogin", "orders");
+    window.location.href = "login.html";
+  } else {
+    window.location.href = "orders.html";
+  }
+}
+</script>
+
+</body>
+</html>

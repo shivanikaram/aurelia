@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Profile</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<div class="navbar">
+  <div class="navbar-container">
+
+    <!-- Left (can be empty or search later) -->
+    <div></div>
+
+    <!-- Center Logo -->
+    <div class="nav-logo">AURELIA</div>
+
+    <!-- Right Actions -->
+    <div class="nav-actions">
+      <a href="#" onclick="goProfile()">👤</a>
+      <a href="cart.html" title="Cart">🛒</a>
+    </div>
+
+
+  </div>
+
+  <!-- SECOND ROW: LINKS -->
+  <div class="navbar-container" style="justify-content:center;">
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="products.html">Shop</a>
+      <a href="aboutus.html">About Us</a>
+      <a href="contactus.html">Contact Us</a>
+      <a href="storelocator.html">Store Locator</a>
+      <a href="#" onclick="goOrders()">My Orders</a>
+      <a href="register.html">Sign Up</a>
+    </div>
+  </div>
+</div>
+
+
+<body>
+<!-- PROFILE CONTENT -->
+<div class="container profile-section">
+
+  <h2 class="section-heading">
+    MY PROFILE
+    <i class="fas fa-pen edit-icon" onclick="openEditPopup()"></i>
+  </h2>
+
+
+  <div class="profile-card">
+
+    <div class="profile-row">
+      <span class="profile-label">Customer ID</span>
+      <span class="profile-value" id="cid"></span>
+    </div>
+
+    <div class="profile-row">
+      <span class="profile-label">Name</span>
+      <span class="profile-value" id="name"></span>
+    </div>
+
+    <div class="profile-row">
+      <span class="profile-label">Email</span>
+      <span class="profile-value" id="email"></span>
+    </div>
+
+    <div class="profile-row">
+      <span class="profile-label">Phone</span>
+      <span class="profile-value" id="phone"></span>
+    </div>
+
+    <div class="profile-row">
+      <span class="profile-label">Address</span>
+      <span class="profile-value" id="address"></span>
+    </div>
+
+  </div>
+
+  <div class="profile-actions">
+    <button onclick="logout()">Logout</button>
+  </div>
+
+</div>
+
+<!-- EDIT PROFILE POPUP -->
+<div id="editPopup" class="popup-overlay">
+
+  <div class="popup-card">
+
+    <h3>Edit Profile</h3>
+
+    <input id="editName" placeholder="Full Name">
+    <input id="editPhone" placeholder="Phone">
+    <input id="editAddress" placeholder="Address">
+
+    <div class="popup-actions">
+      <button onclick="saveProfile()">Save</button>
+      <button onclick="closeEditPopup()">Cancel</button>
+    </div>
+
+  </div>
+
+</div>
+
+
+<script>
+const user = JSON.parse(localStorage.getItem("user"));
+
+if (!user) {
+  window.location.href = "login.html";
+}
+
+// Populate profile
+function loadProfile() {
+  document.getElementById("cid").innerText = user.customer_id;
+  document.getElementById("name").innerText = user.name;
+  document.getElementById("email").innerText = user.email;
+  document.getElementById("phone").innerText = user.phone;
+  document.getElementById("address").innerText = user.address;
+}
+loadProfile();
+
+// Popup controls
+function openEditPopup() {
+  document.getElementById("editPopup").style.display = "flex";
+
+  document.getElementById("editName").value = user.name;
+  document.getElementById("editPhone").value = user.phone;
+  document.getElementById("editAddress").value = user.address;
+}
+
+function closeEditPopup() {
+  document.getElementById("editPopup").style.display = "none";
+}
+
+// Save profile
+function saveProfile() {
+
+  const updatedData = {
+    customer_id: user.customer_id,
+    name: document.getElementById("editName").value,
+    phone: document.getElementById("editPhone").value,
+    address: document.getElementById("editAddress").value
+  };
+
+  fetch("/update-profile", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(updatedData)
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (!data.success) {
+      alert("Update failed");
+      return;
+    }
+
+    // Update localStorage
+    user.name = updatedData.name;
+    user.phone = updatedData.phone;
+    user.address = updatedData.address;
+
+    localStorage.setItem("user", JSON.stringify(user));
+
+    loadProfile();
+    closeEditPopup();
+    alert("Profile updated");
+  });
+}
+
+function logout() {
+  localStorage.removeItem("user");
+  localStorage.removeItem("cart");
+  window.location.href = "index.html";
+}
+</script>
+
+
+<!-- FOOTER -->
+<footer class="footer">
+
+  <div class="footer-top">
+    <div class="footer-contact">
+      Contact us at +94 123 456 789
+    </div>
+
+    <div class="footer-socials">
+      <a href="https://web.facebook.com/" title="Facebook">
+        <i class="fab fa-facebook-f"></i>
+      </a>
+      <a href="https://www.instagram.com/" title="Instagram">
+        <i class="fab fa-instagram"></i>
+      </a>
+    </div>
+  </div>
+
+  <div class="footer-divider"></div>
+
+  <div class="footer-bottom">
+    © 2026 Aurelia ·
+    <a href="#">Privacy Policy</a> ·
+    <a href="#">Terms of Service</a> ·
+    <a href="#">Shipping Policy</a>
+  </div>
+
+</footer>
+<script src="js/nav.js"></script>
+
+</body>
+</html>

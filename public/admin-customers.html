@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin - Customers</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+<!-- ADMIN NAVBAR -->
+<div class="navbar-container admin-navbar">
+  <div></div>
+  <div class="nav-logo admin-logo">AURELIA</div>
+  <div class="nav-actions">
+    <button onclick="logout()">⏻</button>
+  </div>
+</div>
+
+<div class="navbar-container" style="justify-content:center;">
+  <div class="nav-links">
+    <a href="admin.html">Dashboard</a>
+    <a href="admin-customers.html">View Customers</a>
+    <a href="admin-products.html">Manage Products</a>
+    <a href="admin-orders.html">View Orders</a>
+  </div>
+</div>
+<br>
+<hr>
+
+<!-- CONTENT -->
+ 
+<div class="container">
+
+  <h2 class="section-heading">CUSTOMER LIST</h2>
+
+  <table class="admin-table">
+    <thead>
+      <tr>
+        <th>Customer ID</th>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Phone</th>
+        <th>Address</th>
+      </tr>
+    </thead>
+    <tbody id="customersTable"></tbody>
+  </table>
+
+</div>
+
+<script>
+// 🔐 ADMIN CHECK
+if (!localStorage.getItem("admin")) {
+  window.location.href = "login.html";
+}
+
+// LOAD CUSTOMERS
+function loadCustomers() {
+  fetch("/admin/customers")
+    .then(res => res.json())
+    .then(customers => {
+      const table = document.getElementById("customersTable");
+      table.innerHTML = "";
+
+      customers.forEach(c => {
+        table.innerHTML += `
+          <tr>
+            <td>${c.customer_id}</td>
+            <td>${c.name}</td>
+            <td>${c.email}</td>
+            <td>${c.phone}</td>
+            <td>${c.address}</td>
+            <td>
+              <td class="action-cell">
+                <i class="fas fa-trash delete-icon"
+                    onclick="deleteCustomer('${c.customer_id}')"
+                    title="Delete customer"></i>
+                </td>
+            </td>
+          </tr>
+        `;
+      });
+    });
+}
+
+loadCustomers();
+
+// DELETE CUSTOMER
+function deleteCustomer(customerId) {
+  if (!confirm("Are you sure you want to delete this customer?")) return;
+
+  fetch("/admin/delete-customer/" + customerId, {
+    method: "DELETE"
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      alert("Customer deleted");
+      loadCustomers();
+    } else {
+      alert("Delete failed");
+    }
+  });
+}
+
+function logout() {
+  localStorage.removeItem("admin");
+  window.location.href = "login.html";
+}
+</script>
+
+</body>
+</html>

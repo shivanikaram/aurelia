@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin - Products</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+<!-- ADMIN NAVBAR -->
+<div class="navbar-container admin-navbar">
+  <div></div>
+  <div class="nav-logo admin-logo">AURELIA</div>
+  <div class="nav-actions">
+    <button onclick="logout()">⏻</button>
+  </div>
+</div>
+
+<div class="navbar-container" style="justify-content:center;">
+  <div class="nav-links">
+    <a href="admin.html">Dashboard</a>
+    <a href="admin-customers.html">View Customers</a>
+    <a href="admin-products.html">Manage Products</a>
+    <a href="admin-orders.html">View Orders</a>
+  </div>
+</div>
+<br>
+<hr>
+
+<h2 class="section-heading">ORDER LIST</h2>
+
+<div class="container">
+
+  <table class="admin-table">
+    <thead>
+      <tr>
+        <th>Order ID</th>
+        <th>Customer</th>
+        <th>Phone</th>
+        <th>City</th>
+        <th>Total (LKR)</th>
+        <th>Payment</th>
+        <th>Status</th>
+        <th>Date</th>
+      </tr>
+    </thead>
+
+    <tbody id="ordersTable"></tbody>
+  </table>
+
+</div>
+
+<script>
+// 🔐 ADMIN CHECK
+if (!localStorage.getItem("admin")) {
+  window.location.href = "login.html";
+}
+
+loadOrders();
+
+function loadOrders() {
+  fetch("/admin/orders")
+    .then(res => res.json())
+    .then(orders => {
+      const table = document.getElementById("ordersTable");
+      table.innerHTML = "";
+
+      if (orders.length === 0) {
+        table.innerHTML = `
+          <tr>
+            <td colspan="8" style="text-align:center;">
+              No orders found
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      orders.forEach(o => {
+        table.innerHTML += `
+          <tr>
+            <td>${o.order_id}</td>
+            <td>${o.customer_name}</td>
+            <td>${o.customer_phone}</td>
+            <td>${o.delivery_city}</td>
+            <td>${o.total_amount.toLocaleString()}</td>
+            <td>${o.payment_mode}</td>
+            <td>
+                <select onchange="updateStatus('${o.order_id}', this.value)">
+                    <option value="Placed" ${o.order_status === "Placed" ? "selected" : ""}>
+                    Placed
+                    </option>
+                    <option value="Processing" ${o.order_status === "Processing" ? "selected" : ""}>
+                    Processing
+                    </option>
+                    <option value="Shipped" ${o.order_status === "Shipped" ? "selected" : ""}>
+                    Shipped
+                    </option>
+                    <option value="Delivered" ${o.order_status === "Delivered" ? "selected" : ""}>
+                    Delivered
+                    </option>
+                    <option value="Cancelled" ${o.order_status === "Cancelled" ? "selected" : ""}>
+                    Cancelled
+                    </option>
+                </select>
+            </td>
+            <td>${new Date(o.order_date).toLocaleDateString()}</td>
+          </tr>
+        `;
+      });
+    });
+}
+
+function logout() {
+  localStorage.removeItem("admin");
+  window.location.href = "login.html";
+}
+
+function updateStatus(orderId, newStatus) {
+
+  fetch("/admin/update-order-status", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      order_id: orderId,
+      order_status: newStatus
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (!data.success) {
+      alert("Failed to update status");
+    }
+  });
+}
+
+</script>
+
+</body>
+</html>

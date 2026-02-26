@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Register</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="auth-wrapper">
+
+  <div class="auth-card">
+
+    <div class="auth-logo">AURELIA</div>
+
+    <h2 class="auth-title">Create Account</h2>
+
+    <input id="fullname" type="text" placeholder="Full Name">
+    <input id="email" type="email" placeholder="Email">
+    <input id="password" type="password" placeholder="Password">
+    <input id="phone" type="text" placeholder="Phone">
+    <input id="address" type="text" placeholder="Address">
+
+    <button class="auth-button" onclick="register()">Register</button>
+
+    <p class="auth-footer">
+      Already have an account?
+      <a href="login.html">Sign in</a>
+    </p>
+
+  </div>
+
+</div>
+
+<script>
+function register() {
+
+  const fullName = document.getElementById("fullname").value;
+  const emailVal = document.getElementById("email").value;
+  const passwordVal = document.getElementById("password").value;
+  const phoneVal = document.getElementById("phone").value;
+  const addressVal = document.getElementById("address").value;
+
+  fetch("/register", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      name: fullName,
+      email: emailVal,
+      password: passwordVal,
+      phone: phoneVal,
+      address: addressVal
+    })
+  }).then(() => {
+    alert("Registration successful");
+    window.location.href = "login.html";
+  });
+}
+</script>
+
+</body>
+</html>

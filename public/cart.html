@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Cart</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+<body>
+
+<!-- NAVBAR -->
+<div class="navbar">
+  <div class="navbar-container">
+    <div></div>
+    <div class="nav-logo">AURELIA</div>
+    <div class="nav-actions">
+      <a href="#" onclick="goProfile()">👤</a>
+      <a href="cart.html">🛒</a>
+    </div>
+  </div>
+
+  <div class="navbar-container" style="justify-content:center;">
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="products.html">Shop</a>
+      <a href="aboutus.html">About Us</a>
+      <a href="contactus.html">Contact Us</a>
+      <a href="storelocator.html">Store Locator</a>
+      <a href="#" onclick="goOrders()">My Orders</a>
+      <a href="register.html">Sign Up</a>
+    </div>
+  </div>
+</div>
+
+<!-- CART PAGE -->
+<div class="container cart-page">
+
+  <div class="cart-header">
+    <h2>Your cart</h2>
+    <a href="products.html" class="continue-link">Continue shopping</a>
+  </div>
+
+  <div class="cart-grid">
+
+    <!-- LEFT: CART ITEMS -->
+    <div class="cart-items" id="cart"></div>
+
+    <!-- RIGHT: SUMMARY -->
+    <div class="cart-summary">
+      <div class="summary-title">Estimated total</div>
+      <div class="summary-amount" id="total"></div>
+      <p class="summary-note">
+        Tax included. Shipping calculated at checkout.
+      </p>
+      <button class="btn-primary" onclick="goCheckout()">Check out</button>
+    </div>
+
+  </div>
+
+</div>
+
+
+<script>
+// 🔐 LOGIN CHECK
+if (!localStorage.getItem("user")) {
+  alert("Please login to view cart");
+  window.location.href = "login.html";
+}
+
+const cart = JSON.parse(localStorage.getItem("cart")) || [];
+const container = document.getElementById("cart");
+let totalAmount = 0;
+
+if (cart.length === 0) {
+  container.innerHTML = "<p>Your cart is empty.</p>";
+} else {
+  cart.forEach((item, index) => {
+    totalAmount += item.sub_total;
+
+    container.innerHTML += `
+      <div class="cart-item">
+        <div class="cart-item-info">
+          <div class="cart-item-name">${item.product_name}</div>
+          <div class="cart-item-price">LKR ${item.unit_price}</div>
+        </div>
+
+        <div class="cart-item-qty">
+          ${item.quantity}
+        </div>
+
+        <div class="cart-item-total">
+          LKR ${item.sub_total}
+        </div>
+
+        <div class="cart-item-remove" onclick="removeItem(${index})">
+          <i class="fas fa-trash"></i>
+        </div>
+      </div>
+    `;
+  });
+
+  document.getElementById("total").innerText =
+    "LKR " + totalAmount.toLocaleString();
+}
+
+function removeItem(index) {
+  cart.splice(index, 1);
+  localStorage.setItem("cart", JSON.stringify(cart));
+  location.reload();
+}
+
+function goCheckout() {
+  window.location.href = "checkout.html";
+}
+
+</script>
+
+
+
+<!-- FOOTER -->
+<footer class="footer">
+
+  <div class="footer-top">
+    <div class="footer-contact">
+      Contact us at +94 123 456 789
+    </div>
+
+    <div class="footer-socials">
+      <a href="https://web.facebook.com/" title="Facebook">
+        <i class="fab fa-facebook-f"></i>
+      </a>
+      <a href="https://www.instagram.com/" title="Instagram">
+        <i class="fab fa-instagram"></i>
+      </a>
+    </div>
+  </div>
+
+  <div class="footer-divider"></div>
+
+  <div class="footer-bottom">
+    © 2026 Aurelia ·
+    <a href="#">Privacy Policy</a> ·
+    <a href="#">Terms of Service</a> ·
+    <a href="#">Shipping Policy</a>
+  </div>
+
+</footer>
+<script src="js/nav.js"></script>
+
+</body>
+</html>
+

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Cart</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+<body>
+
+<!-- NAVBAR -->
+<div class="navbar">
+  <div class="navbar-container">
+    <div></div>
+    <div class="nav-logo">AURELIA</div>
+    <div class="nav-actions">
+      <a href="#" onclick="goProfile()">👤</a>
+      <a href="cart.html">🛒</a>
+    </div>
+  </div>
+
+  <div class="navbar-container" style="justify-content:center;">
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="products.html">Shop</a>
+      <a href="aboutus.html">About Us</a>
+      <a href="contactus.html">Contact Us</a>
+      <a href="storelocator.html">Store Locator</a>
+      <a href="#" onclick="goOrders()">My Orders</a>
+      <a href="register.html">Sign Up</a>
+    </div>
+  </div>
+</div>
+
+<body>
+
+<!-- CHECKOUT -->
+<div class="container checkout-page">
+
+  <div class="checkout-grid">
+
+    <!-- LEFT -->
+    <div class="checkout-left">
+
+      <h2>Checkout</h2>
+
+      <!-- CONTACT -->
+      <div class="checkout-section">
+        <h3>Contact</h3>
+        <p id="contactEmail"></p>
+      </div>
+
+      <!-- DELIVERY DETAILS -->
+      <div class="checkout-section">
+        <h3>Delivery</h3>
+
+        <input id="name" placeholder="Full name">
+        <input id="phone" placeholder="Phone number">
+        <input id="address" placeholder="Address">
+        <input id="city" placeholder="City">
+
+        <label>Payment method</label>
+        <select id="paymentMode">
+          <option value="Cash on Delivery">Cash on Delivery</option>
+          <option value="Card on Delivery">Card on Delivery</option>
+          <option value="Pick Up In Store">Pick Up In Store</option>
+        </select>
+      </div>
+
+      <button class="checkout-btn" onclick="placeOrder()">Place Order</button>
+
+    </div>
+
+    <!-- RIGHT -->
+    <div class="checkout-right">
+
+      <h3>Order summary</h3>
+
+      <div id="summary"></div>
+
+      <div class="summary-line">
+        <span>Subtotal</span>
+        <span id="subtotal"></span>
+      </div>
+
+      <div class="summary-line-1">
+        <span>Shipping</span>
+        <span>FREE</span>
+      </div>
+
+      <div class="summary-total">
+        <span>Total</span>
+        <span id="total"></span>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script src="js/nav.js"></script>
+
+<script>
+// 🔐 LOGIN CHECK
+const user = JSON.parse(localStorage.getItem("user"));
+if (!user) {
+  alert("Please login to checkout");
+  window.location.href = "login.html";
+}
+
+// PREFILL CONTACT
+document.getElementById("contactEmail").innerText = user.email;
+document.getElementById("name").value = user.name || "";
+document.getElementById("phone").value = user.phone || "";
+document.getElementById("address").value = user.address || "";
+
+// CART SUMMARY
+const cart = JSON.parse(localStorage.getItem("cart")) || [];
+const summaryDiv = document.getElementById("summary");
+
+let totalAmount = 0;
+
+if (cart.length === 0) {
+  alert("Cart is empty");
+  window.location.href = "products.html";
+}
+
+cart.forEach(item => {
+  totalAmount += item.sub_total;
+
+  summaryDiv.innerHTML += `
+    <div class="summary-item">
+      <span>${item.product_name} × ${item.quantity}</span>
+      <span>LKR ${item.sub_total}</span>
+    </div>
+  `;
+});
+
+document.getElementById("subtotal").innerText =
+  "LKR " + totalAmount.toLocaleString();
+
+document.getElementById("total").innerText =
+  "LKR " + totalAmount.toLocaleString();
+
+// PLACE ORDER
+function placeOrder() {
+
+  const orderData = {
+    customer_id: user.customer_id,
+    customer_name: document.getElementById("name").value,
+    customer_phone: document.getElementById("phone").value,
+    delivery_address: document.getElementById("address").value,
+    delivery_city: document.getElementById("city").value,
+    items: cart,
+    total_amount: totalAmount,
+    payment_mode: document.getElementById("paymentMode").value
+  };
+
+  fetch("/place-order", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(orderData)
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (!data.success) {
+      alert("Order failed");
+      return;
+    }
+
+    localStorage.removeItem("cart");
+    alert("Order placed successfully");
+    window.location.href = "orders.html";
+  });
+
+   
+
+}
+</script>
+
+</body>
+</html>

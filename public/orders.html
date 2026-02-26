@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Orders</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<div class="navbar">
+  <div class="navbar-container">
+
+    <!-- Left (can be empty or search later) -->
+    <div></div>
+
+    <!-- Center Logo -->
+    <div class="nav-logo">AURELIA</div>
+
+    <!-- Right Actions -->
+    <div class="nav-actions">
+      <a href="#" onclick="goProfile()">👤</a>
+      <a href="cart.html" title="Cart">🛒</a>
+    </div>
+
+
+  </div>
+
+  <!-- SECOND ROW: LINKS -->
+  <div class="navbar-container" style="justify-content:center;">
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="products.html">Shop</a>
+      <a href="aboutus.html">About Us</a>
+      <a href="contactus.html">Contact Us</a>
+      <a href="storelocator.html">Store Locator</a>
+      <a href="#" onclick="goOrders()">My Orders</a>
+      <a href="register.html">Sign Up</a>
+    </div>
+  </div>
+</div>
+
+<body>
+<div class="container orders-section">
+
+  <h2 class="section-heading">MY ORDERS</h2>
+
+  <div id="orders"></div>
+
+</div>
+
+
+<script>
+// 🔐 LOGIN CHECK
+const user = JSON.parse(localStorage.getItem("user"));
+
+if (!user) {
+  alert("Please login to view your orders");
+  window.location.href = "login.html";
+}
+
+// 🚫 ADMIN NOT ALLOWED
+if (localStorage.getItem("admin")) {
+  window.location.href = "admin.html";
+}
+
+// FETCH ORDERS
+fetch(`/orders/${user.customer_id}`)
+  .then(res => res.json())
+  .then(orders => {
+    const container = document.getElementById("orders");
+
+    if (orders.length === 0) {
+      container.innerHTML = "<p>No orders found.</p>";
+      return;
+    }
+
+    orders.forEach(order => {
+      let itemsHtml = "";
+
+      order.items.forEach(item => {
+        itemsHtml += `
+          <tr>
+            <td>${item.product_name}</td>
+            <td>${item.quantity}</td>
+            <td>LKR ${item.unit_price}</td>
+            <td>LKR ${item.sub_total}</td>
+          </tr>
+        `;
+      });
+
+      container.innerHTML += `
+        <div class="order-card">
+
+          <div class="order-header">
+            <div class="order-id">Order ID: ${order.order_id}</div>
+            <div class="order-status ${order.order_status.toLowerCase()}">
+              ${order.order_status}
+            </div>
+          </div>
+
+          <table class="order-table">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Qty</th>
+                <th>Unit Price</th>
+                <th>Sub Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${itemsHtml}
+            </tbody>
+          </table>
+
+          <div class="order-footer">
+            <strong>Total Amount:</strong>
+            <span>LKR ${order.total_amount}</span>
+          </div>
+
+        </div>
+      `;
+    });
+  })
+  .catch(err => {
+    console.error(err);
+    document.getElementById("orders").innerText =
+      "Error loading orders";
+  });
+
+function logout() {
+  localStorage.removeItem("user");
+  localStorage.removeItem("cart");
+  window.location.href = "index.html";
+}
+</script>
+
+
+<!-- FOOTER -->
+<footer class="footer">
+
+  <div class="footer-top">
+    <div class="footer-contact">
+      Contact us at +94 123 456 789
+    </div>
+
+    <div class="footer-socials">
+      <a href="https://web.facebook.com/" title="Facebook">
+        <i class="fab fa-facebook-f"></i>
+      </a>
+      <a href="https://www.instagram.com/" title="Instagram">
+        <i class="fab fa-instagram"></i>
+      </a>
+    </div>
+  </div>
+
+  <div class="footer-divider"></div>
+
+  <div class="footer-bottom">
+    © 2026 Aurelia ·
+    <a href="#">Privacy Policy</a> ·
+    <a href="#">Terms of Service</a> ·
+    <a href="#">Shipping Policy</a>
+  </div>
+
+</footer>
+<script src="js/nav.js"></script>
+
+</body>
+</html>

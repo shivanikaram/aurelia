@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Home</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<div class="navbar">
+  <div class="navbar-container">
+    <div></div>
+    <div class="nav-logo">AURELIA</div>
+    <div class="nav-actions">
+      <a href="#" onclick="goProfile()">👤</a>
+      <a href="cart.html">🛒</a>
+    </div>
+  </div>
+
+  <div class="navbar-container" style="justify-content:center;">
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="products.html">Shop</a>
+      <a href="aboutus.html">About Us</a>
+      <a href="contactus.html">Contact Us</a>
+      <a href="storelocator.html">Store Locator</a>
+      <a href="#" onclick="goOrders()">My Orders</a>
+      <a href="register.html">Sign Up</a>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE CONTENT -->
+<div class="container">
+  <p style="text-align:center; margin-top:10px;">
+    <a href="products.html" class="hero-link">
+      Your one stop shop for all your jewellery needs →
+    </a>
+  </p>
+</div>
+
+<!-- PRODUCT DETAILS -->
+<div class="container product-page">
+
+  <div class="product-grid">
+
+    <!-- LEFT: IMAGE -->
+    <div class="product-image">
+      <img id="productImg" src="" alt="">
+    </div>
+
+    <!-- RIGHT: INFO -->
+    <div class="product-info">
+
+      <div class="product-category">FINE GOLD PLATED JEWELLERY</div>
+
+      <h1 id="productName"></h1>
+
+      <div class="product-price" id="productPrice"></div>
+
+      <p class="product-description" id="productDesc"></p>
+
+      <div class="product-quantity">
+        <label>Quantity</label>
+        <input type="number" id="qty" value="1" min="1">
+      </div>
+
+      <button class="btn-outline" onclick="addToCart()">Add to cart</button>
+      <button class="btn-primary" onclick="buyNow()">Buy it now</button>
+
+      <div class="product-note">
+        ✔ Free returns within 7 days<br>
+        ✔ Premium jewellery packaging (Contact us for more information)
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-top">
+    <div class="footer-contact">
+      Contact us at +94 123 456 789
+    </div>
+    <div class="footer-socials">
+      <a href="#"><i class="fab fa-facebook-f"></i></a>
+      <a href="#"><i class="fab fa-instagram"></i></a>
+    </div>
+  </div>
+  <div class="footer-divider"></div>
+  <div class="footer-bottom">
+    © 2026 Aurelia ·
+    <a href="#">Privacy Policy</a> ·
+    <a href="#">Terms of Service</a> ·
+    <a href="#">Shipping Policy</a>
+  </div>
+</footer>
+
+<script src="js/nav.js"></script>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+const productId = params.get("id");
+
+let currentProduct = null;
+
+fetch("/product/" + productId)
+  .then(res => res.json())
+  .then(p => {
+    currentProduct = p;
+
+    document.getElementById("productName").innerText = p.name;
+    document.getElementById("productPrice").innerText = "LKR " + p.price.toLocaleString();
+    document.getElementById("productDesc").innerText = p.description;
+    document.getElementById("productImg").src = p.image;
+    document.getElementById("qty").max = p.stock;
+  });
+
+function addToCart() {
+  if (!localStorage.getItem("user")) {
+    alert("Please login to add items to cart");
+    localStorage.setItem("redirectAfterLogin", "product:" + currentProduct.product_id);
+    window.location.href = "login.html";
+    return;
+  }
+
+  const qty = parseInt(document.getElementById("qty").value);
+  const subTotal = qty * currentProduct.price;
+
+  let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+  cart.push({
+    product_id: currentProduct.product_id,
+    product_name: currentProduct.name,
+    unit_price: currentProduct.price,
+    quantity: qty,
+    sub_total: subTotal
+  });
+
+  localStorage.setItem("cart", JSON.stringify(cart));
+  window.location.href = "cart.html";
+}
+
+
+function buyNow() {
+
+  // 🔐 If not logged in
+  if (!localStorage.getItem("user")) {
+    alert("Please login to continue");
+    localStorage.setItem(
+      "redirectAfterLogin",
+      "product:" + currentProduct.product_id
+    );
+    window.location.href = "login.html";
+    return;
+  }
+
+  const qty = parseInt(document.getElementById("qty").value);
+  const subTotal = qty * currentProduct.price;
+
+  // 🛒 Create TEMP cart with ONLY this product
+  const buyNowCart = [
+    {
+      product_id: currentProduct.product_id,
+      product_name: currentProduct.name,
+      unit_price: currentProduct.price,
+      quantity: qty,
+      sub_total: subTotal
+    }
+  ];
+
+  // 🔄 Replace cart
+  localStorage.setItem("cart", JSON.stringify(buyNowCart));
+
+  // ➡️ Go directly to checkout
+  window.location.href = "checkout.html";
+}
+
+</script>
+
+
+
+</body>
+
+
+
+
+</html>
+

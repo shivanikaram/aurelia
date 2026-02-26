@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Login</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="auth-wrapper">
+
+  <div class="auth-card">
+
+    <div class="auth-logo">AURELIA</div>
+
+    <h2 class="auth-title">Sign in</h2>
+
+    <input id="email" type="email" placeholder="Email">
+    <input id="password" type="password" placeholder="Password">
+
+    <button class="auth-button" onclick="login()">Login</button>
+
+    <p class="auth-footer">
+      Don’t have an account?
+      <a href="register.html">Create account</a>
+    </p>
+
+  </div>
+
+</div>
+
+<script>
+function login() {
+  const emailVal = email.value.trim();
+  const passwordVal = password.value.trim();
+
+  // ADMIN LOGIN
+  if (emailVal === "admin@gmail.com" && passwordVal === "admin123") {
+    localStorage.setItem("admin", "true");
+    window.location.href = "admin.html";
+    return;
+  }
+
+  // USER LOGIN
+  fetch("/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email: emailVal, password: passwordVal })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (!data.success) {
+      alert("Invalid login");
+      return;
+    }
+
+    localStorage.setItem("user", JSON.stringify(data.user));
+
+    // 🔥 INTENT-BASED REDIRECT
+    const redirect = localStorage.getItem("redirectAfterLogin");
+
+    if (redirect && redirect.startsWith("product:")) {
+      const productId = redirect.split(":")[1];
+      window.location.href = "product.html?id=" + productId;
+    } else if (redirect === "orders") {
+      window.location.href = "orders.html";
+    } else if (redirect === "profile") {
+      window.location.href = "profile.html";
+    } else {
+      window.location.href = "index.html";
+    }
+
+    localStorage.removeItem("redirectAfterLogin");
+  });
+}
+</script>
+
+</body>
+</html>
